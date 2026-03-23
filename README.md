@@ -215,7 +215,6 @@ Outputs are saved in `/output`.
 project/
 ├── data/
 ├── code/
-├── output/
 ├── report/
 └── README.md
 ```
