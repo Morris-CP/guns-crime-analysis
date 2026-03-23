@@ -1,215 +1,157 @@
 # Do Concealed Carry Laws Reduce Crime?
 
-### A Causal Inference and Decision-Oriented Analysis Using U.S. Panel Data (1977–1999)
+### Causal Inference with U.S. Panel Data (1977–1999)
 
 ---
 
-## 1. Research Question
+## 1. Problem
 
-Do “shall-issue” concealed carry laws reduce violent crime rates?
+Do “shall-issue” concealed carry laws reduce violent crime?
 
 More broadly:
-**How should we interpret estimated policy effects for real-world decision-making?**
+**How do we avoid misleading conclusions when evaluating policy or interventions using observational data?**
 
 ---
 
-## 2. Why This Matters
+## 2. Dataset
 
-This question is a canonical example in applied econometrics and highlights a broader issue:
-
-> Correlation-based analysis can lead to misleading conclusions in both policy and business contexts.
-
-The same challenge appears in:
-
-* Marketing effectiveness evaluation
-* Product feature impact analysis
-* Policy intervention assessment
-
-This project emphasizes **causal identification over naive prediction**.
-
----
-
-## 3. Data
-
-* **Unit**: U.S. states (including D.C.)
-* **Period**: 1977–1999
-* **Observations**: 1,173 (balanced panel)
+* 51 U.S. states (including D.C.)
+* 1977–1999 (23 years)
+* 1,173 observations (balanced panel)
 
 ### Key Variables
 
-* `vio`: Violent crime rate (per 100,000 population)
-* `mur`: Murder rate
-* `rob`: Robbery rate
-* `shall`: Indicator for concealed carry law adoption
-* `incarc_rate`: Incarceration rate
+* `vio`: violent crime rate
+* `shall`: policy indicator
 * Controls:
 
-  * `avginc` (income)
-  * `pop` (population)
-  * `density`
-  * demographic variables (`pb1064`, `pw1064`, `pm1029`)
+  * incarceration rate
+  * income
+  * population
+  * density
+  * demographics
 
 ---
 
-## 4. Data Characteristics and Modeling Choices
+## 3. Why This Is Non-Trivial
 
-Summary statistics reveal several important features that directly inform the empirical strategy:
+A simple comparison is misleading because:
 
-### Skewness in Crime Variables
+* States differ systematically (culture, baseline crime)
+* Policies are not randomly assigned
+* Crime trends evolve over time
 
-* Violent crime ranges from **47 to 2921**
-* Indicates strong right-skewness
-
-→ The dependent variable is log-transformed to stabilize variance and allow percentage interpretation.
-
-### Staggered Policy Adoption
-
-* The policy variable (`shall`) equals 1 in ~24% of observations
-* States adopt the law at different times
-
-→ This creates a **staggered difference-in-differences setting**, implemented via a two-way fixed effects model.
-→ Potential bias in TWFE under staggered adoption is acknowledged.
-
-### Cross-State Heterogeneity
-
-* Large variation in population and density
-* Substantial differences in crime levels
-
-→ State fixed effects are necessary to control for time-invariant heterogeneity.
-
-### Potential Policy Confounding
-
-* Incarceration rates range from 19 to 1913
-
-→ Suggests multiple policy channels affecting crime, raising concerns about omitted variable bias.
-
-### Implication
-
-These features motivate a fixed effects framework and careful interpretation of causal estimates.
+👉 This is a **causal inference problem**, not just regression.
 
 ---
 
-## 5. Identification Strategy
+## 4. Data → Model Decisions
 
-To estimate causal effects, I use a **two-way fixed effects (TWFE) model**:
+The modeling strategy is directly informed by the data:
 
-* State fixed effects → control for unobserved, time-invariant differences
-* Year fixed effects → control for common shocks
+* Crime variables are highly skewed
+  → log transformation
 
-This corresponds to a **difference-in-differences framework**.
+* Policy adoption varies across states and time
+  → staggered DID setting
 
-### Key Assumption
+* Large cross-state heterogeneity
+  → state fixed effects
 
-* **Parallel trends**: In the absence of treatment, treated and control states would follow similar trends.
+* Strong time trends
+  → year fixed effects
 
-### Diagnostics
+---
 
-* Compare:
+## 5. Methodology
 
-  * OLS
-  * OLS + controls
-  * State FE
-  * Two-way FE
-* Hausman test supports fixed effects over random effects
+I estimate progressively stricter models:
 
-### Limitations
+1. OLS
+2. OLS + controls
+3. State fixed effects
+4. Two-way fixed effects (TWFE)
 
-* Policy adoption may be endogenous
-* Time-varying confounders may remain
-* No full event-study validation
+Standard errors are clustered at the state level.
 
 ---
 
 ## 6. Results
 
-### Main Findings
+### Main Finding (Violent Crime)
 
-| Model          | Effect               | Interpretation         |
-| -------------- | -------------------- | ---------------------- |
-| OLS            | Not significant      | Confounded             |
-| OLS + Controls | -4.6%                | Sensitive              |
-| State FE       | -4.0%                | Controls heterogeneity |
-| **Two-Way FE** | **-3.8% (p < 0.05)** | Preferred estimate     |
+* OLS: significant negative effect
+* OLS + controls: still negative
+* Fixed effects: effect shrinks
+* **TWFE: not statistically significant**
 
-### Interpretation
+👉 Interpretation:
 
-Shall-issue laws are associated with a **~3.8% reduction in violent crime** after controlling for state and time effects.
+The initial “crime-reducing effect” disappears once we control for:
 
-However:
+* unobserved state differences
+* common time trends
 
-* Effects vary across crime types
-* Magnitude is modest
-* Results depend on specification
-
-👉 The policy effect is **limited and context-dependent**, not universally strong.
+→ **Evidence does not support a robust causal effect**
 
 ---
 
-## 7. Robustness Checks
+### Other Crime Types
 
-* Clustered standard errors at the state level
-* Alternative model specifications
-* Subsample analysis by crime type
-
-Results are directionally consistent but vary in magnitude.
+* Robbery and murder show the same pattern
+  → results are **not robust across outcomes**
 
 ---
 
-## 8. From Causality to Decision-Making
-
-Causal estimation alone is not sufficient for real-world applications.
-
-### Key Considerations
-
-* Average treatment effect ≠ actionable decision
-* Effect heterogeneity matters
-* Statistical significance ≠ economic significance
-
-### Business Analogy
-
-This framework applies directly to:
-
-* Marketing campaign evaluation
-* Product feature rollouts
-* A/B testing with panel data
-
-### Extensions
-
-* Heterogeneous treatment effect estimation
-* Causal machine learning (e.g., double ML, causal forests)
-* Policy targeting strategies
+## 7. What This Means
 
 ### Key Insight
 
-> Effective data science requires combining:
->
-> * Causal inference (what works)
-> * Prediction (where it works best)
+> Naive models overstate policy effects.
+
+### Implications
+
+* Correlation ≠ causation
+* Model specification fundamentally changes conclusions
+* Careful identification is critical in both:
+
+  * public policy
+  * business analytics
 
 ---
 
-## 9. Reproducibility
+## 8. From Policy to Data Science
 
-### Environment
+This framework generalizes to real-world DS problems:
 
-* Python (pandas, statsmodels, linearmodels)
-* Stata
+| Policy Context | Business Equivalent    |
+| -------------- | ---------------------- |
+| Law adoption   | Feature rollout        |
+| Treated states | Exposed users          |
+| Crime outcome  | Conversion / retention |
 
-### How to Run
+👉 Same challenge:
+**estimating causal impact, not just predicting outcomes**
+
+---
+
+## 9. Limitations
+
+* Possible policy endogeneity
+* No explicit event study
+* TWFE limitations under staggered adoption
+
+---
+
+## 10. Reproducibility
 
 ```bash
-# Stata
 stata code/analysis.do
-
-# Python
-python code/analysis.py
 ```
-
-Outputs are saved in `/output`.
 
 ---
 
-## 10. Repository Structure
+## 11. Structure
 
 ```
 project/
@@ -218,23 +160,5 @@ project/
 ├── report/
 └── README.md
 ```
-
----
-
-## 11. Limitations and Future Work
-
-* Address endogeneity using instrumental variables
-* Implement event-study design
-* Explore heterogeneous effects
-* Integrate causal machine learning
-
----
-
-## 12. Key Takeaways
-
-* Naive correlations can be misleading
-* Identification strategy is central to credible inference
-* Statistically significant effects may be economically modest
-* Causal inference is necessary, but not sufficient, for decision-making
 
 ---
