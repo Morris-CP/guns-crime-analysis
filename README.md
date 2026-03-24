@@ -146,7 +146,7 @@ This framework generalizes to real-world DS problems:
 ## 10. Reproducibility
 
 ```bash
-stata code/analysis.do
+code.do
 ```
 
 ---
